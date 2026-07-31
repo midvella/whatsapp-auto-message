@@ -1,0 +1,25 @@
+{
+    "contacts": [
+        {
+            "name": "Örnek Kişi",
+            "phone": "905001234567",
+            "id": "abc12345"
+        }
+    ],
+    "groups": [
+        {
+            "name": "Örnek Grup",
+            "id": "123456789"
+        }
+    ],
+    "messages": [
+        {
+            "name": "Tanıtım",
+            "content": "Merhaba {ad}, bu bir örnek mesajdır.",
+            "id": "msg123"
+        }
+    ],
+    "config": {
+        "browser": "chrome"
+    }
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş WhatsApp Kontrol Paneli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-animation"></div>
+
+    <main class="dashboard-container">
+        <header class="panel-header">
+            <div class="logo">
+                <i class="fab fa-whatsapp"></i>
+                <h1>WhatsApp <span>ProBot</span></h1>
+            </div>
+            <p>Selenium tabanlı, tek sekmede süper hızlı gönderim ve kişi yönetimi.</p>
+
+            <div class="browser-select">
+                <i class="fas fa-globe"></i>
+                <label for="browser-type">Tarayıcı:</label>
+                <select id="browser-type" class="select-sm">
+                    <option value="chrome">Chrome / Chromium</option>
+                    <option value="firefox">Firefox</option>
+                </select>
+            </div>
+        </header>
+
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-tab="tab-send"><i class="fas fa-paper-plane"></i> Mesaj Gönder</button>
+            <button class="tab-btn" data-tab="tab-contacts"><i class="fas fa-users"></i> Kişiler & Gruplar</button>
+            <button class="tab-btn" data-tab="tab-messages"><i class="fas fa-comment-alt"></i> Mesaj Şablonları</button>
+        </nav>
+
+        <section id="tab-send" class="tab-content active glass-panel">
+            <div class="safety-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="safety-content">
+                    <strong>Önemli Güvenlik Uyarısı:</strong>
+                    Aşırı sayıda ve çok hızlı mesaj gönderimi WhatsApp hesabınızın spam olarak işaretlenmesine ve
+                    kapatılmasına neden olabilir.
+                    Lütfen makul sayılarda gönderim yapın ve her zaman bekleme sürelerini dikkate alın.
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                <div class="send-config">
+                    <h2><i class="fas fa-cogs"></i> Gönderim Ayarları</h2>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-file-alt"></i> Mesaj Şablonu Seç</label>
+                        <select id="select-template">
+                            <option value="">-- Şablon Seç --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-users-cog"></i> Hedef Seçimi (Kişiler ve Gruplar)</label>
+                        <div class="target-list" id="target-selection-list">
+                        </div>
+                    </div>
+
+                    <button id="btn-prepare-send" class="btn-primary mt-4">
+                        <i class="fas fa-rocket"></i> Gönderimi Başlat
+                    </button>
+                </div>
+
+                <div class="send-status">
+                    <h2><i class="fas fa-chart-line"></i> Canlı Durum</h2>
+
+                    <div class="status-card" id="status-card">
+                        <div class="status-icon waiting"><i class="fas fa-clock"></i></div>
+                        <h3 id="status-text">Bekleniyor...</h3>
+                        <p id="status-detail">Görevi başlatmak için sol taraftan hedef ve mesaj seçin.</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box"><span class="stat-label">Toplam</span><span class="stat-value"
+                                id="stat-total">0</span></div>
+                        <div class="stat-box success"><span class="stat-label">Başarılı</span><span class="stat-value"
+                                id="stat-success">0</span></div>
+                        <div class="stat-box danger"><span class="stat-label">Hatalı</span><span class="stat-value"
+                                id="stat-failed">0</span></div>
+                    </div>
+
+                    <div class="logs-container mt-4">
+                        <h3><i class="fas fa-history"></i> Bot İşlem Logları</h3>
+                        <div id="bot-logs" class="bot-logs">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-contacts" class="tab-content glass-panel">
+            <div class="grid-layout">
+                <div>
+                    <div class="flex-between mb-4">
+                        <h2><i class="fas fa-user-friends"></i> Rehber (Kişiler)</h2>
+                        <button class="btn-danger-sm" onclick="uygulama.islemler.kisileri_temizle_onay()"><i
+                                class="fas fa-trash-alt"></i> Hepsini Sil</button>
+                    </div>
+                    <form id="form-add-contact" class="inline-form">
+                        <input type="text" id="contact-name" placeholder="İsim" required>
+                        <input type="text" id="contact-phone" placeholder="No (örn: 90532..)" required>
+                        <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Ekle</button>
+                    </form>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th width="150">İsim</th>
+                                    <th>Numara</th>
+                                    <th width="120">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-contacts"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex-between mb-4">
+                        <h2><i class="fas fa-users"></i> Whatsapp Grupları</h2>
+                        <button class="btn-danger-sm" onclick="uygulama.islemler.gruplari_temizle_onay()"><i
+                                class="fas fa-trash-alt"></i> Hepsini Sil</button>
+                    </div>
+                    <form id="form-add-group" class="inline-form">
+                        <input type="text" id="group-name" placeholder="Tam Grup Adı (örn: Aile)" required
+                            style="flex-grow: 1;">
+                        <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Ekle</button>
+                    </form>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Grup Adı</th>
+                                    <th width="120">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-groups"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-messages" class="tab-content glass-panel">
+            <div class="flex-between mb-4">
+                <h2><i class="fas fa-envelope-open-text"></i> Mesaj Şablonları</h2>
+                <button class="btn-danger-sm" onclick="uygulama.islemler.sablonlari_temizle_onay()"><i
+                        class="fas fa-trash-alt"></i>
+                    Hepsini Sil</button>
+            </div>
+
+            <form id="form-add-message" class="block-form mb-4">
+                <input type="text" id="msg-title" placeholder="Şablon Başlığı (Örn: Bayram Mesajı)" required>
+                <textarea id="msg-text" rows="4" placeholder="Mesaj İçeriği..." required></textarea>
+                <button type="submit" class="btn-success"><i class="fas fa-plus"></i> Şablonu Kaydet</button>
+            </form>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th width="180">Başlık</th>
+                            <th>Mesaj İçeriği</th>
+                            <th width="120">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-messages"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-exclamation-triangle warning-icon"></i> Onay Gerekiyor</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                Bu işlemi yapmak istediğinize emin misiniz?
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modal-cancel">İptal</button>
+                <button class="btn-primary" id="modal-confirm">Evet, Onaylıyorum</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="review-send-modal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-clipboard-check"></i> Gönderim Özeti ve Onayı</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Aşağıdaki kişilere/gruplara mesaj gönderilecek. Lütfen kontrol edip onaylayın.</p>
+                <div class="review-box mt-4">
+                    <strong>Seçilen Şablon:</strong>
+                    <div id="review-message-text" class="review-text"></div>
+                </div>
+                <div class="review-box mt-4">
+                    <strong>Hedef Liste:</strong>
+                    <ul id="review-target-list" class="review-list"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="review-cancel">İptal, Düzenle</button>
+                <button class="btn-success" id="review-confirm"><i class="fas fa-paper-plane"></i> Mesajları
+                    Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="edit-modal-title"><i class="fas fa-edit"></i> Düzenle</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit" class="block-form">
+                    <input type="hidden" id="edit-id">
+                    <input type="hidden" id="edit-type">
+                    <div id="edit-fields">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="edit-cancel">İptal</button>
+                <button class="btn-primary" id="btn-save-edit">Değişiklikleri Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
